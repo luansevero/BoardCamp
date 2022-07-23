@@ -9,8 +9,18 @@ const categoriesController = {
         }catch(error){
             res.sendStatus(500);
         }
+    },
+    newPost: async function(req,res){
+        const newCategorie = req.body;
+        try{
+            await connection.query(`INSERT INTO categories (name) VALUES ($1)`, [newCategorie.name]);
+
+            res.sendStatus(201);
+        }catch(error){
+            res.sendStatus(500);
+        }
     }
 }
 
 
-export default categoriesController
+export default categoriesController;
