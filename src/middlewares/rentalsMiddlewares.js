@@ -7,43 +7,51 @@ const rentalsMiddlewares = {
         const newRent = req.body;
         const validation =  rentalsSchema.validate(newRent);
         if(validation.error){return res.sendStatus(400)};
-        console.log('Passei pelo Schema')
         next();
     },
     haveCostumer: async function(req,res,next){
         const { customerId } = req.body;
-        const { rows:customer } = await connection.query(`SELECT * FROM customers WHERE id=$1`, [customerId]);
-        if(customer.length === 0){return res.sendStatus(400)};
-        console.log('Passei pelo haveCostumer')
-        next();
+        try{
+            const { rows:customer } = await connection.query(`SELECT * FROM customers WHERE id=$1`, [customerId]);
+            if(customer.length === 0){return res.sendStatus(400)};
+            next();
+        }catch(error){
+            res.sendStatus(500);
+        };
     },
     haveGame:async function(req,res,next){
         const { gameId } = req.body;
-        const { rows:game } = await connection.query(`SELECT * FROM games WHERE id=$1`, [gameId]);
-        if(game.length === 0){return res.sendStatus(400)};
-        res.locals.game = game
-        console.log('Passei pelo haveGame')
-        next();
+        try{
+            const { rows:game } = await connection.query(`SELECT * FROM games WHERE id=$1`, [gameId]);
+            if(game.length === 0){return res.sendStatus(400)};
+            res.locals.game = game
+            next();
+        }catch(error){
+            res.sendStatus(500);
+        };
     },
-    haveStock: async function(req,res,next){
+    haveStock: function(res,next){
         const game  = res.locals.game[0]
         if(game.stockTotal === 0){return res.sendStatus(400)};
-        console.log('Passei pelo haveRent')
         next();
     },
     haveRent: async function(req,res,next){
         const { id } = req.params;
-        const { rows:rent } = await connection.query(`SELECT * FROM rentals WHERE id=$1`, [id]);
-        if(rent.length === 0){return res.sendStatus(404)};
-        res.locals.rent = rent;
-        next()
+        try{
+            const { rows:rent } = await connection.query(`SELECT * FROM rentals WHERE id=$1`, [id]);
+            if(rent.length === 0){return res.sendStatus(404)};
+            res.locals.rent = rent;
+            next()
+        }catch(error){
+            res.sendStatus(500);
+        };
     },
-    isReturned: function(req,res,next){
+    isReturned: function(res,next){
         const { returnDate } = res.locals.rent[0];
         if(returnDate !== null){return res.sendStatus(400)};
         next()
     },
-    haveDelay: function(req,res,next){
+    haveDelay: function(res,next){
         const { daysRented, rentDate }= res.locals.rent[0];
         const delayTime = dayjs().diff(rentDate, 'day');
         if(daysRented < delayTime){
@@ -51,7 +59,7 @@ const rentalsMiddlewares = {
         }
         next();
     },
-    isReallyReturned: function(req,res,next){
+    isReallyReturned: function(res,next){
         const { returnDate } = res.locals.rent[0];
         if(returnDate === null){return res.sendStatus(400)};
         next()
