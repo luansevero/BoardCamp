@@ -60,6 +60,11 @@ const rentalsController = {
         )
 
         res.sendStatus(201);
+    },
+    delete: async function(req,res){
+        const { id } = req.params;
+        await connection.query(`DELETE FROM rentals WHERE id=$1`, [id]);
+        res.sendStatus(200)
     }
 
 }

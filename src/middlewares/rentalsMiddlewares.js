@@ -50,6 +50,11 @@ const rentalsMiddlewares = {
             res.locals.delay = delayTime - daysRented;
         }
         next();
+    },
+    isReallyReturned: function(req,res,next){
+        const { returnDate } = res.locals.rent[0];
+        if(returnDate === null){return res.sendStatus(400)};
+        next()
     }
 };
 
