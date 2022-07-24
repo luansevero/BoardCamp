@@ -42,6 +42,20 @@ const customerController = {
         }catch(error){
             res.sendStatus(500);
         }
+    },
+    changeInfos: async function(req,res){
+        const {name, phone, cpf, birthday} = res.locals.customer;
+        try{
+            await connection.query(`
+                UPDATE customers
+                SET name=$1, phone=$2, birthday=$4
+                WHERE cpf=$3
+            `, [name, phone, cpf, birthday]
+            )
+            res.sendStatus(201)
+        }catch(error){
+            res.sendStatus(500);
+        }
     }
 }
 
