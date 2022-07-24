@@ -3,7 +3,7 @@ import connection from "../setup/database.js";
 const gamesController = {
     get: async function(req,res){
         try{
-            const { rows:games } = connection.query(`
+            const { rows:games } = await connection.query(`
                 SELECT g.*, c.name as "categoryName" 
                 FROM games g 
                 JOIN categories c
@@ -24,7 +24,7 @@ const gamesController = {
                 ($1, $2, $3, $4, $5)`,
                 [name, image, stockTotal, categoryId, pricePerDay]
             )
-            res.send(201)
+            res.sendStatus(201)
         }catch(error){
             res.sendStatus(500);
         }
