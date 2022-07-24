@@ -44,13 +44,14 @@ const customerController = {
         }
     },
     changeInfos: async function(req,res){
-        const {name, phone, cpf, birthday} = res.locals.customer;
+        const {name, phone, cpf, birthday} = req.body;
+        const { id } = req.params;
         try{
             await connection.query(`
                 UPDATE customers
-                SET name=$1, phone=$2, birthday=$4
-                WHERE cpf=$3
-            `, [name, phone, cpf, birthday]
+                SET name=$1, phone=$2, cpf=$3, birthday=$4
+                WHERE id=$5
+            `, [name, phone, cpf, birthday, id]
             )
             res.sendStatus(201)
         }catch(error){

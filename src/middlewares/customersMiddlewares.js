@@ -15,30 +15,38 @@ const customersMiddleware = {
         next();
     },
     haveCostumer: async function(req,res,next){
-        const cpf = req.body.cpf
         const { id } = req.params;
-        let customer;
         try{
-            if(id !== undefined){
-                customer = await connection.query(`
-                SELECT * FROM customers
-                WHERE id=$1
-                `, [id]
-                );
-            } else {
-                customer = await connection.query(`
-                SELECT * FROM customers
-                WHERE cpf=$1
-                `, [cpf])
-            }
+            const { rows:customer } = await connection.query(`
+            SELECT * FROM customers
+            WHERE id=$1
+            `, [id]
+            );
 
-            if(customer.rows.length === 0){return res.sendStatus(404)};
+            if(customer.length === 0){return res.sendStatus(404)};
 
-            res.locals.customer = customer.rows;
+            res.locals.customer = customer;
             next()
         }catch(error){
             res.sendStatus(500)
         };
+    },
+    cpfIsInUse: async function(req,res,next){
+        const { cpf }  = res.locals.customer[0];
+        const changedCpf = req.body.cpf
+        try{
+            if(cpf !== changedCpf){
+                const { rows:customer } = await connection.query(`
+                SELECT * FROM customers
+                WHERE cpf=$1
+                `, [cpf]
+                );
+                if(customer.length > 0){return res.sendStatus(409)};
+            }
+            next()
+        }catch(error){
+            res.sendStatus(500);
+        }
     }
 };
 
