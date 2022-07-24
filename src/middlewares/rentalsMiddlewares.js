@@ -30,7 +30,7 @@ const rentalsMiddlewares = {
             res.sendStatus(500);
         };
     },
-    haveStock: function(res,next){
+    haveStock: function(req,res,next){
         const game  = res.locals.game[0]
         if(game.stockTotal === 0){return res.sendStatus(400)};
         next();
@@ -46,12 +46,12 @@ const rentalsMiddlewares = {
             res.sendStatus(500);
         };
     },
-    isReturned: function(res,next){
+    isReturned: function(req,res,next){
         const { returnDate } = res.locals.rent[0];
         if(returnDate !== null){return res.sendStatus(400)};
         next()
     },
-    haveDelay: function(res,next){
+    haveDelay: function(req,res,next){
         const { daysRented, rentDate }= res.locals.rent[0];
         const delayTime = dayjs().diff(rentDate, 'day');
         if(daysRented < delayTime){
@@ -59,7 +59,7 @@ const rentalsMiddlewares = {
         }
         next();
     },
-    isReallyReturned: function(res,next){
+    isReallyReturned: function(req,res,next){
         const { returnDate } = res.locals.rent[0];
         if(returnDate === null){return res.sendStatus(400)};
         next()
