@@ -32,9 +32,9 @@ const customersMiddleware = {
                 `, [cpf])
             }
 
-            if(customer.length === 0){return res.sendStatus(404)};
+            if(customer.rows.length === 0){return res.sendStatus(404)};
 
-            res.locals.customer = customer;
+            res.locals.customer = customer.rows;
             next()
         }catch(error){
             res.sendStatus(500)

@@ -21,7 +21,7 @@ const customerController = {
         }
     },
     getById: async function(req,res){
-        const { customer } = req.locals;
+        const { customer } = res.locals;
         try{
             res.send(customer)
         }catch(error){
