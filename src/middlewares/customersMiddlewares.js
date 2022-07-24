@@ -1,4 +1,5 @@
 import connection from "../setup/database.js";
+import customersSchema from "../schemas/customersSchema.js";
 
 const customersMiddleware = {
     haveId: async function(req,res,next){
@@ -16,6 +17,18 @@ const customersMiddleware = {
         }catch(error){
             res.sendStatus(500)
         };
+    },
+    validate: function(req,res,next){
+        const newCustomer = req.body;
+        const validation =  customersSchema.validate(newCustomer);
+        if(validation.error){return res.send(validation.error)};
+        next();
+    },
+    isNew: async function(req,res,next){
+        const  cpf  = req.body.cpf;
+        const { rows:customer } = await connection.query(`SELECT * FROM customers WHERE cpf=$1`, [cpf]);
+        if(customer.length > 0){return res.sendStatus(409)};
+        next();
     }
 };
 
