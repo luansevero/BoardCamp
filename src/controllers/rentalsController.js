@@ -42,7 +42,26 @@ const rentalsController = {
         )
 
         res.sendStatus(201);
+    },
+    finishRent: async function(req,res){
+        const { customerId, gameId, rentDate, daysRented, originalPrice } = res.locals.rent[0];
+        const { delay } = res.locals;
+        const { id } = req.params
+        let mult = null;
+        if(delay !== undefined){
+            mult = delay
+        }
+
+        await connection.query(`
+        UPDATE rentals
+        SET "customerId"=$1, "gameId"=$2, "rentDate"=$3, "daysRented"=$4, "returnDate"=$5, "originalPrice"=$6, "delayFee"=$7
+        WHERE id=$8
+        `, [Math.floor(customerId), Math.floor(gameId), rentDate, Math.floor(daysRented), dayjs().format('YYYY-MM-DD'), originalPrice, mult, id]
+        )
+
+        res.sendStatus(201);
     }
+
 }
 /* 
 

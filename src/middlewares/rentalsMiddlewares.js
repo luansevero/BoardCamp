@@ -1,5 +1,6 @@
 import connection from "../setup/database.js";
 import rentalsSchema from "../schemas/rentalsSchema.js";
+import dayjs from "dayjs";
 
 const rentalsMiddlewares = {
     validation: function(req,res,next){
@@ -24,10 +25,30 @@ const rentalsMiddlewares = {
         console.log('Passei pelo haveGame')
         next();
     },
-    haveRent: async function(req,res,next){
+    haveStock: async function(req,res,next){
         const game  = res.locals.game[0]
         if(game.stockTotal === 0){return res.sendStatus(400)};
         console.log('Passei pelo haveRent')
+        next();
+    },
+    haveRent: async function(req,res,next){
+        const { id } = req.params;
+        const { rows:rent } = await connection.query(`SELECT * FROM rentals WHERE id=$1`, [id]);
+        if(rent.length === 0){return res.sendStatus(404)};
+        res.locals.rent = rent;
+        next()
+    },
+    isReturned: function(req,res,next){
+        const { returnDate } = res.locals.rent[0];
+        if(returnDate !== null){return res.sendStatus(400)};
+        next()
+    },
+    haveDelay: function(req,res,next){
+        const { daysRented, rentDate }= res.locals.rent[0];
+        const delayTime = dayjs().diff(rentDate, 'day');
+        if(daysRented < delayTime){
+            res.locals.delay = delayTime - daysRented;
+        }
         next();
     }
 };
