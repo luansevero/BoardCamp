@@ -11,6 +11,7 @@ const categoriesMiddleware = {
     isNew: async function(req,res,next){
         const newCategorie = req.body;
         const { rows:categorie } = await connection.query(`SELECT name FROM categories WHERE name=$1`, [newCategorie.name]);
+        console.log(categorie.length)
         if(categorie.length > 0){return res.sendStatus(409)};
         next();
     }

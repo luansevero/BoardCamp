@@ -19,6 +19,14 @@ const customerController = {
         }catch(error){
             res.sendStatus(500);
         }
+    },
+    getById: async function(req,res){
+        const { customer } = req.locals;
+        try{
+            res.send(customer)
+        }catch(error){
+            res.sendStatus(500);
+        }
     }
 }
 
