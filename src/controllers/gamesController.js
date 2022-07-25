@@ -2,13 +2,19 @@ import connection from "../setup/database.js";
 
 const gamesController = {
     get: async function(req,res){
+        const { name } = req.query;
+        let gamesQuery = `
+        SELECT g.*, c.name as "categoryName" 
+        FROM games g 
+        JOIN categories c
+        ON g."categoryId" = c.id
+        `;
+        console.log(name)
         try{
-            const { rows:games } = await connection.query(`
-                SELECT g.*, c.name as "categoryName" 
-                FROM games g 
-                JOIN categories c
-                ON g."categoryId" = c.id
-            `)
+            if(name !== undefined){
+                gamesQuery += ` WHERE g.name LIKE '${name}%'`;
+            }
+            const { rows:games } = await connection.query(gamesQuery)
             res.send(games)
         }catch(error){
             res.sendStatus(500);
