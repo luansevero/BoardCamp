@@ -3,19 +3,13 @@ import connection from "../setup/database.js";
 const customerController = {
     get: async function(req,res){
         const { cpf } = req.query;
+        let customerQuery = `SELECT * FROM customers `;
         try{
             if(cpf !== undefined){
-                const {rows:customers} = await connection.query(`
-                SELECT * FROM customers 
-                WHERE cpf 
-                LIKE $1
-                `, [`${cpf}%`]
-                );
-                res.send(customers)
-            } else {
-                const {rows:customers} =  await connection.query(`SELECT * FROM customers`);
-                res.send(customers)
-            }    
+                customerQuery += ` WHERE cpf LIKE '${cpf}%'`;
+            }
+            const {rows:customers} =  await connection.query(customerQuery);
+            res.send(customers)   
         }catch(error){
             res.sendStatus(500);
         }
