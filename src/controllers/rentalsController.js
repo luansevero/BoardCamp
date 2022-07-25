@@ -4,7 +4,22 @@ import dayjs from 'dayjs';
 const rentalsController = {
     get: async function(req,res){
         const query  = req.query;
-        let joinQuery = `JOIN customers c
+        const { queryString } = res.locals;
+        const { queryValues } = res.locals;
+        let joinQuery = `
+        SELECT r.*,
+        jsonb_build_object(
+            'id', c.id,
+            'name', c.name
+        ) as customer,
+        jsonb_build_object(
+            'id', g.id,
+            'name', g.name,
+            'categoryId', g."categoryId",
+            'categoryName', categories.name
+        ) as game
+        FROM rentals r
+        JOIN customers c
         ON r."customerId"= c.id
         JOIN games g
         ON r."gameId" = g.id
@@ -20,22 +35,12 @@ const rentalsController = {
             if(query.customerId && query.gameId){
                 joinQuery += ` AND r."gameId"=${query.gameId}`
             }
+            if(queryString.length > 0){
+                joinQuery += queryString
+            }
+            console.log(joinQuery, queryValues)
 
-            const { rows:allRentals } = await connection.query(`
-            SELECT r.*,
-            jsonb_build_object(
-                'id', c.id,
-                'name', c.name
-            ) as customer,
-            jsonb_build_object(
-                'id', g.id,
-                'name', g.name,
-                'categoryId', g."categoryId",
-                'categoryName', categories.name
-            ) as game
-            FROM rentals r
-            ${joinQuery}
-            `);
+            const { rows:allRentals } = await connection.query(joinQuery, queryValues);
             res.send(allRentals);
         }catch(error){
             res.sendStatus(500);
