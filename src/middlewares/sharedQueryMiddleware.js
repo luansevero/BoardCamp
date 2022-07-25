@@ -16,20 +16,23 @@ const sharedQueryMiddlewares = {
                 auxQuery.splice(i, 1)
                 i--
             }
-
         }
         res.locals.query = query;
         res.locals.auxQuery = auxQuery;
+        let queryString = ``;
+        res.locals.queryString = queryString;
+        const queryValues = [];
+        res.locals.queryValues = queryValues;
         next();
     },
     addOrdenation: function(req,res,next){
         const querys = req.query;
         let { queryString } = res.locals;
-
-        if(querys.order !== undefined){
+        
+        if(querys.order){
             queryString += ` ORDER BY ${querys.order}`
         }
-        if(querys.desc !== undefined && querys.desc === 'true'){
+        if(querys.desc && querys.desc === 'true'){
             queryString += ` DESC`
         }
 
@@ -38,7 +41,7 @@ const sharedQueryMiddlewares = {
     },
     addPagination: function(req,res,next){
         let { queryString } = res.locals;
-        const queryValues = [];
+        const { queryValues } = res.locals;
         const { auxQuery } = res.locals;
         const { query } = res.locals;
 

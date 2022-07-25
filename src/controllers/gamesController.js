@@ -4,7 +4,7 @@ import connection from "../setup/database.js";
 const gamesController = {
     get: async function(req,res){
         const {name}  = req.query;
-        const { queryString } = res.locals;
+        let { queryString } = res.locals;
         const { queryValues } = res.locals;
 
         let gamesQuery = `
@@ -17,13 +17,12 @@ const gamesController = {
         if(name !== undefined){
             gamesQuery += ` WHERE g.name LIKE '${name}%'`;
         }
-        if(queryString.length > 0){
-            gamesQuery += queryString
-        }
-
+        console.log(queryString)
+        // if(queryString.length > 0){
+        //     gamesQuery += queryString
+        // }
 
         try{
-            
             const { rows:games } = await connection.query(gamesQuery, queryValues)
 
             res.send(games)

@@ -66,34 +66,61 @@ const rentalsMiddlewares = {
     },
     haveFilter: function(req,res,next){
         const query = {...req.query};
-        let queryString = ``;
-        const status = () => {
-            if(query.status){
-                if(query.status === 'open'){
-                    queryString += ` WHERE r."returnDate" IS null`;
-                } else if(query.status === 'close'){
-                    queryString += ` WHERE r."returnDate" IS NOT null`;
-                }
-            };
-        };
-        const customer = () =>{
-            if(!query.status && query.customerId){
-                queryString += ` WHERE r."customerId"=${query.customerId}`;
-            } else if(query.customerId){
-                queryString += ` AND r."customerId"=${query.customerId}`;
-            };
-        };
-        const game = () =>{
-            if(!query.status && !query.customerId && query.gameId){
-                queryString += ` WHERE r."gameId"=${query.gameId}`;
-            } else if(query.gameId){
-                queryString += ` AND r."gameId"=${query.gameId}`;
-            };
-        };
+        let { queryString }  = res.locals;
 
-        status();
-        customer();
-        game();
+        const addToString = {
+            status: (isFirst) => {
+                if(isFirst){
+                    if(query.status === 'open'){
+                        queryString += ` WHERE r."returnDate" IS null`;
+                    } else if(query.status === 'close'){
+                        queryString += ` WHERE r."returnDate" IS NOT null`;
+                    }
+                } else {
+                    if(query.status === 'open'){
+                        queryString += ` AND r."returnDate" IS null`;
+                    } else if(query.status === 'close'){
+                        queryString += ` AND r."returnDate" IS NOT null`;
+                    }
+                }
+                
+            },
+            customerId: (isFirst) =>{
+                if(isFirst){
+                    queryString += ` WHERE r."customerId"=${query.customerId}`;
+                } else {
+                    queryString += ` AND r."customerId"=${query.customerId}`;
+                };
+            },
+            gameId: (isFirst) =>{
+                if(isFirst){
+                    queryString += ` WHERE r."gameId"=${query.gameId}`;
+                } else {
+                    queryString += ` AND r."gameId"=${query.gameId}`;
+                };
+            },
+            startDate: (isFirst) =>{
+                if(isFirst){
+                    queryString += ` WHERE r."rentDate" >= ${query.startDate}`
+                } else {
+                    queryString += ` AND r."rentDate" >= ${query.startDate}`
+                }
+            }
+        }
+
+        const auxQuery = Object.keys(query);
+        const queryTypes = ['status', 'customerId', 'gameId', 'startDate']
+        let isFirst = true;
+        for(let i = 0; i < auxQuery.length; i++){
+            const queryString = auxQuery[i];
+            for(let k = 0; k < queryTypes.length; k++){
+                if(queryTypes[k] === queryString){
+                    addToString[queryString](isFirst);
+                    isFirst = false
+                    break;
+                }
+            }
+        }
 
         res.locals.queryString = queryString;
         next();

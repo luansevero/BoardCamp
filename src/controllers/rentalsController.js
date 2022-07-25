@@ -3,7 +3,6 @@ import dayjs from 'dayjs';
 
 const rentalsController = {
     get: async function(req,res){
-        const query  = req.query;
         const { queryString } = res.locals;
         const { queryValues } = res.locals;
         let joinQuery = `
