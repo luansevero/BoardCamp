@@ -2,8 +2,24 @@ import connection from "../setup/database.js";
 
 const categoriesController = {
     get: async function(req,res){
+        const query = req.query;
+        let allCategoriesQuery = `SELECT * FROM categories`;
+
         try{
-            const { rows:allCategories } = await connection.query(`SELECT * FROM categories`);
+            if(query.order !== undefined){
+                allCategoriesQuery += ` ORDER BY ${query.order}`
+            }
+            if(query.desc !== undefined || query.desc === 'true'){
+                allCategoriesQuery += ` DESC`
+            }
+            if(query.limit !== undefined){
+                allCategoriesQuery += ` LIMIT ${query.limit}`
+            }
+            if(query.offset !== undefined){
+                allCategoriesQuery += ` OFFSET ${query.offset}`
+            }
+            
+            const { rows:allCategories } = await connection.query(allCategoriesQuery);
 
             res.send(allCategories)
         }catch(error){
