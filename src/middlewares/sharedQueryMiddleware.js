@@ -38,15 +38,16 @@ const sharedQueryMiddlewares = {
     },
     addPagination: function(req,res,next){
         let { queryString } = res.locals;
-        let { queryValues } = res.locals;
+        const queryValues = [];
         const { auxQuery } = res.locals;
         const { query } = res.locals;
 
-        const index = (queryS) => {auxQuery.indexOf(queryS)}
+        const index = (queryS) => auxQuery.indexOf(queryS);
 
         if(query.limit){
             queryString += ` LIMIT $${index('limit') + 1}`
             queryValues.splice(index('limit'), 0, query.limit)
+
         }
         if(query.offset){
             queryString += ` OFFSET $${index('offset') + 1}`

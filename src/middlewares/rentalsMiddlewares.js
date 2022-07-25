@@ -70,9 +70,9 @@ const rentalsMiddlewares = {
         const status = () => {
             if(query.status){
                 if(query.status === 'open'){
-                    queryString += ` WHERE r."returnDate"= null`;
+                    queryString += ` WHERE r."returnDate" IS null`;
                 } else if(query.status === 'close'){
-                    queryString += ` WHERE r."returnDate"!= null`;
+                    queryString += ` WHERE r."returnDate" IS NOT null`;
                 }
             };
         };
