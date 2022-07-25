@@ -55,7 +55,7 @@ const rentalsMiddlewares = {
         const { daysRented, rentDate }= res.locals.rent[0];
         const delayTime = dayjs().diff(rentDate, 'day');
         if(daysRented < delayTime){
-            res.locals.delay = delayTime - daysRented;
+            res.locals.delay = (delayTime - daysRented) * 15000;
         }
         next();
     },

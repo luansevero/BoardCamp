@@ -3,7 +3,24 @@ import dayjs from 'dayjs';
 
 const rentalsController = {
     get: async function(req,res){
+        const query  = req.query;
+        let joinQuery = `JOIN customers c
+        ON r."customerId"= c.id
+        JOIN games g
+        ON r."gameId" = g.id
+        JOIN categories
+        ON g."categoryId" = categories.id`;
+
         try{
+            if(query.customerId){
+                joinQuery += ` WHERE r."customerId"=${query.customerId}`
+            } else if(query.gameId) {
+                joinQuery += ` WHERE r."gameId"=${query.gameId}`
+            }
+            if(query.customerId && query.gameId){
+                joinQuery += ` AND r."gameId"=${query.gameId}`
+            }
+
             const { rows:allRentals } = await connection.query(`
             SELECT r.*,
             jsonb_build_object(
@@ -17,12 +34,7 @@ const rentalsController = {
                 'categoryName', categories.name
             ) as game
             FROM rentals r
-            JOIN customers c
-            ON "customerId"= c.id
-            JOIN games g
-            ON "gameId" = g.id
-            JOIN categories
-            ON g."categoryId" = categories.id
+            ${joinQuery}
             `);
             res.send(allRentals);
         }catch(error){
