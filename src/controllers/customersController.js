@@ -3,12 +3,19 @@ import connection from "../setup/database.js";
 const customerController = {
     get: async function(req,res){
         const { cpf } = req.query;
-        let customerQuery = `SELECT * FROM customers `;
+        const { queryString } = res.locals;
+        const { queryValues } = res.locals;
+        let customerQuery = `SELECT * FROM customers`;
         try{
             if(cpf !== undefined){
                 customerQuery += ` WHERE cpf LIKE '${cpf}%'`;
             }
-            const {rows:customers} =  await connection.query(customerQuery);
+            if(queryString.length > 0){
+                customerQuery += queryString
+            }
+            console.log(customerQuery)
+            console.log(queryValues)
+            const {rows:customers} =  await connection.query(customerQuery,queryValues);
             res.send(customers)   
         }catch(error){
             res.sendStatus(500);
