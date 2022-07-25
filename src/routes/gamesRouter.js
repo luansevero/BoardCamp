@@ -5,7 +5,7 @@ import sharedQueryMiddlewares from "../middlewares/sharedQueryMiddleware.js";
 
 const gamesRouter = Router();
 
-gamesRouter.get("/games", sharedQueryMiddlewares.removeInvalidQuery, sharedQueryMiddlewares.addQueryString, gamesController.get);
+gamesRouter.get("/games", sharedQueryMiddlewares.removeInvalidQuery, sharedQueryMiddlewares.addOrdenation, sharedQueryMiddlewares.addPagination, gamesController.get);
 gamesRouter.post("/games", gamesMiddlewares.validation, gamesMiddlewares.isNew,gamesMiddlewares.haveCategory, gamesController.newGame);
 
 export default gamesRouter;

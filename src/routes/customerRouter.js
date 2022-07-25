@@ -5,7 +5,7 @@ import sharedQueryMiddlewares from "../middlewares/sharedQueryMiddleware.js";
 
 const customerRoute = Router();
 
-customerRoute.get("/customers",sharedQueryMiddlewares.removeInvalidQuery,sharedQueryMiddlewares.addQueryString, customerController.get);
+customerRoute.get("/customers",sharedQueryMiddlewares.removeInvalidQuery,sharedQueryMiddlewares.addOrdenation, sharedQueryMiddlewares.addPagination, customerController.get);
 customerRoute.get("/customers/:id", customersMiddleware.haveCostumer, customerController.getById);
 customerRoute.post("/customers", customersMiddleware.validate, customersMiddleware.isNew, customerController.newCustomer);
 customerRoute.put("/customers/:id", customersMiddleware.validate, customersMiddleware.haveCostumer, customersMiddleware.cpfIsInUse, customerController.changeInfos);

@@ -63,6 +63,67 @@ const rentalsMiddlewares = {
         const { returnDate } = res.locals.rent[0];
         if(returnDate === null){return res.sendStatus(400)};
         next()
+    },
+    haveFilter: function(req,res,next){
+        const query = {...req.query};
+        let { queryString }  = res.locals;
+
+        const addToString = {
+            status: (isFirst) => {
+                if(isFirst){
+                    if(query.status === 'open'){
+                        queryString += ` WHERE r."returnDate" IS null`;
+                    } else if(query.status === 'close'){
+                        queryString += ` WHERE r."returnDate" IS NOT null`;
+                    }
+                } else {
+                    if(query.status === 'open'){
+                        queryString += ` AND r."returnDate" IS null`;
+                    } else if(query.status === 'close'){
+                        queryString += ` AND r."returnDate" IS NOT null`;
+                    }
+                }
+                
+            },
+            customerId: (isFirst) =>{
+                if(isFirst){
+                    queryString += ` WHERE r."customerId"=${query.customerId}`;
+                } else {
+                    queryString += ` AND r."customerId"=${query.customerId}`;
+                };
+            },
+            gameId: (isFirst) =>{
+                if(isFirst){
+                    queryString += ` WHERE r."gameId"=${query.gameId}`;
+                } else {
+                    queryString += ` AND r."gameId"=${query.gameId}`;
+                };
+            },
+            startDate: (isFirst) =>{
+                if(isFirst){
+                    queryString += ` WHERE r."rentDate" >= ${query.startDate}`
+                } else {
+                    queryString += ` AND r."rentDate" >= ${query.startDate}`
+                }
+            }
+        }
+
+        const auxQuery = Object.keys(query);
+        const queryTypes = ['status', 'customerId', 'gameId', 'startDate']
+        let isFirst = true;
+        for(let i = 0; i < auxQuery.length; i++){
+            const queryString = auxQuery[i];
+            for(let k = 0; k < queryTypes.length; k++){
+                if(queryTypes[k] === queryString){
+                    addToString[queryString](isFirst);
+                    isFirst = false
+                    break;
+                }
+            }
+        }
+
+        res.locals.queryString = queryString;
+        next();
     }
 };
 
