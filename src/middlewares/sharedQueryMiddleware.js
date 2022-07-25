@@ -4,7 +4,7 @@ const sharedQueryMiddlewares = {
     removeInvalidQuery: function(req,res,next){
         const query = {...req.query};
         const auxQuery = Object.keys(query);
-        const queryTypes = ['order', 'limit', 'offset']
+        const queryTypes = ['limit', 'offset']
         for(let i = 0; i < auxQuery.length; i++){
             const queryString = auxQuery[i];
             let aux = 0;
@@ -26,19 +26,14 @@ const sharedQueryMiddlewares = {
     },
     addQueryString: function(req,res,next){
         let queryString = ``
+        const querys = req.query;
         const { auxQuery } = res.locals;
         const { query } = res.locals;
         const queryValues = [];
-        let containDesc;
-        if(auxQuery.includes('desc')){
-            auxQuery.splice(auxQuery.indexOf('desc'));
-            containDesc = true
+        if(querys.order !== undefined){
+            queryString += ` ORDER BY ${querys.order}`
         }
-        if(query.order !== undefined){
-            queryString += ` ORDER BY $${auxQuery.indexOf('order') + 1}`
-            queryValues.splice(auxQuery.indexOf('order'), 0,query.order)
-        }
-        if(containDesc){
+        if(querys.desc !== undefined && querys.desc === 'true'){
             queryString += ` DESC`
         }
         if(query.limit !== undefined){
@@ -47,7 +42,7 @@ const sharedQueryMiddlewares = {
         }
         if(query.offset !== undefined){
             queryString += ` OFFSET $${auxQuery.indexOf('offset') + 1}`
-            queryValues.splice(auxQuery.indexOf('offset'), 0,query.offset)
+            queryValues.splice(auxQuery.indexOf('offset'), 0,`${query.offset}`)
         }
 
         res.locals.queryValues = queryValues;
