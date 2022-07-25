@@ -1,5 +1,3 @@
-import connection from "../setup/database.js";
-
 const sharedQueryMiddlewares = {
     removeInvalidQuery: function(req,res,next){
         const query = {...req.query};
@@ -24,32 +22,41 @@ const sharedQueryMiddlewares = {
         res.locals.auxQuery = auxQuery;
         next();
     },
-    addQueryString: function(req,res,next){
-        let queryString = ``
+    addOrdenation: function(req,res,next){
         const querys = req.query;
-        const { auxQuery } = res.locals;
-        const { query } = res.locals;
-        const queryValues = [];
+        let { queryString } = res.locals;
+
         if(querys.order !== undefined){
             queryString += ` ORDER BY ${querys.order}`
         }
         if(querys.desc !== undefined && querys.desc === 'true'){
             queryString += ` DESC`
         }
-        if(query.limit !== undefined){
-            queryString += ` LIMIT $${auxQuery.indexOf('limit') + 1}`
-            queryValues.splice(auxQuery.indexOf('limit'), 0,query.limit)
-        }
-        if(query.offset !== undefined){
-            queryString += ` OFFSET $${auxQuery.indexOf('offset') + 1}`
-            queryValues.splice(auxQuery.indexOf('offset'), 0,`${query.offset}`)
-        }
 
+        res.locals.queryString = queryString;
+        next();
+    },
+    addPagination: function(req,res,next){
+        let { queryString } = res.locals;
+        let { queryValues } = res.locals;
+        const { auxQuery } = res.locals;
+        const { query } = res.locals;
+
+        const index = (queryS) => {auxQuery.indexOf(queryS)}
+
+        if(query.limit){
+            queryString += ` LIMIT $${index('limit') + 1}`
+            queryValues.splice(index('limit'), 0, query.limit)
+        }
+        if(query.offset){
+            queryString += ` OFFSET $${index('offset') + 1}`
+            queryValues.splice(index('offset'), 0, query.offset)
+        }
         res.locals.queryValues = queryValues;
         res.locals.queryString = queryString;
-
         next();
-    }
+    },
+
 
 };
 

@@ -63,6 +63,40 @@ const rentalsMiddlewares = {
         const { returnDate } = res.locals.rent[0];
         if(returnDate === null){return res.sendStatus(400)};
         next()
+    },
+    haveFilter: function(req,res,next){
+        const query = {...req.query};
+        let queryString = ``;
+        const status = () => {
+            if(query.status){
+                if(query.status === 'open'){
+                    queryString += ` WHERE r."returnDate"= null`;
+                } else if(query.status === 'close'){
+                    queryString += ` WHERE r."returnDate"!= null`;
+                }
+            };
+        };
+        const customer = () =>{
+            if(!query.status && query.customerId){
+                queryString += ` WHERE r."customerId"=${query.customerId}`;
+            } else if(query.customerId){
+                queryString += ` AND r."customerId"=${query.customerId}`;
+            };
+        };
+        const game = () =>{
+            if(!query.status && !query.customerId && query.gameId){
+                queryString += ` WHERE r."gameId"=${query.gameId}`;
+            } else if(query.gameId){
+                queryString += ` AND r."gameId"=${query.gameId}`;
+            };
+        };
+
+        status();
+        customer();
+        game();
+
+        res.locals.queryString = queryString;
+        next();
     }
 };
 

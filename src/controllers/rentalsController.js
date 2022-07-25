@@ -27,18 +27,9 @@ const rentalsController = {
         ON g."categoryId" = categories.id`;
 
         try{
-            if(query.customerId){
-                joinQuery += ` WHERE r."customerId"=${query.customerId}`
-            } else if(query.gameId) {
-                joinQuery += ` WHERE r."gameId"=${query.gameId}`
-            }
-            if(query.customerId && query.gameId){
-                joinQuery += ` AND r."gameId"=${query.gameId}`
-            }
             if(queryString.length > 0){
                 joinQuery += queryString
             }
-            console.log(joinQuery, queryValues)
 
             const { rows:allRentals } = await connection.query(joinQuery, queryValues);
             res.send(allRentals);
